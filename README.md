@@ -1,19 +1,43 @@
-# Professional PayPal Integration Pro
+# PayPal Laravel Package
 
-A production-standard Laravel implementation of PayPal's REST API integration, featuring robust error handling, transaction persistence, and audit logging.
+A production-standard Laravel package for PayPal REST API integration, featuring robust error handling, transaction persistence, and audit logging.
 
 ## 🚀 Features
 
-- **Service-Oriented Architecture**: Decoupled payment logic in `PayPalService`.
+- **Service-Oriented Architecture**: Decoupled payment logic.
 - **Database Persistence**: Automatic tracking of every transaction (Pending, Completed, Canceled, Failed).
-- **Audit Logging**: Full traceability of API requests and responses in `storage/logs/laravel.log`.
-- **Input Validation**: Secure handling of payment data via specialized `FormRequest`.
-- **Premium UI**: Modern, responsive checkout interface with glassmorphism aesthetics.
+- **Audit Logging**: Full traceability of API requests and responses.
+- **Action Pattern**: Clean, testable, and reusable business logic.
+- **Ready-to-use UI**: Modern, responsive checkout interface.
 
-## 🛠️ Setup Instructions
+## 🛠️ Installation
 
-1.  **Environment Configuration**:
-    Add your PayPal credentials to your `.env` file:
+1. **Install via Composer**:
+   (Since this is currently a local package, you would typically add it to your `repositories` in `composer.json`)
+
+    ```json
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../path-to-your-package"
+        }
+    ]
+    ```
+
+    Then run:
+
+    ```bash
+    composer require shaanid/paypal-package
+    ```
+
+2. **Publish Configuration and Views**:
+
+    ```bash
+    php artisan vendor:publish --provider="Shaanid\PayPal\PayPalServiceProvider"
+    ```
+
+3. **Environment Configuration**:
+   Add your PayPal credentials to your `.env` file:
 
     ```env
     PAYPAL_MODE=sandbox
@@ -22,31 +46,36 @@ A production-standard Laravel implementation of PayPal's REST API integration, f
     PAYPAL_CURRENCY=USD
     ```
 
-2.  **Run Migrations**:
-
+4. **Run Migrations**:
     ```bash
     php artisan migrate
     ```
 
-3.  **Local Testing**:
-    Start the development server:
-    ```bash
-    php artisan serve
-    ```
-    Navigate to `http://localhost:8000/paypal` to access the checkout page.
+## 📁 Usage
 
-## 📁 Architecture Overview (Enterprise Pattern)
+The package automatically registers the following routes:
 
-This project follows the **Action Pattern**, decoupling business logic from controllers for maximum testability and reusability.
+- `GET /paypal`: The checkout index page.
+- `POST /paypal/process`: Handles order creation and redirection to PayPal.
+- `GET /paypal/success`: Handles successful payment capture.
+- `GET /paypal/cancel`: Handles payment cancellation.
 
-- **`app/DTOs/PayPal/PaymentData.php`**: Data Transfer Object for type-safe payment information.
-- **`app/Actions/PayPal/`**:
-    - `CreatePayPalOrderAction`: Handles record initialization and PayPal order creation.
-    - `CompletePayPalPaymentAction`: Handles payment capture and status finalization.
-    - `CancelPayPalPaymentAction`: Handles user-initiated cancellations.
-- **`app/Services/PayPal/PayPalService.php`**: Low-level infrastructure service wrapping the PayPal SDK.
-- **`app/Http/Controllers/PayPal/PayPalController.php`**: ultra-thin orchestrator that injects and executes actions.
-- **`app/Models/Transaction.php`**: Single source of truth for payment audits.
+### Overriding Logic
+
+You can use the Actions and Services provided by the package in your own controllers:
+
+```php
+use Shaanid\PayPal\Actions\CreatePayPalOrderAction;
+use Shaanid\PayPal\DTOs\PaymentData;
+
+public function checkout(CreatePayPalOrderAction $action)
+{
+    $data = new PaymentData(amount: '20.00', currency: 'USD', userId: auth()->id());
+    $approvalLink = $action->execute($data->toCollection());
+
+    return redirect()->away($approvalLink);
+}
+```
 
 ## 📝 License
 

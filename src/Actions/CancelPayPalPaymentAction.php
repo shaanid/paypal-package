@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Actions\PayPal;
+namespace Shaanid\PayPal\Actions;
 
 use Illuminate\Support\Collection;
-use App\Models\Transaction;
+use Shaanid\PayPal\Models\Transaction;
 
 class CancelPayPalPaymentAction
 {

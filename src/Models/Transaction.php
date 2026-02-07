@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace Shaanid\PayPal\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,6 +32,7 @@ class Transaction extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        $userModel = config('auth.providers.users.model', 'App\Models\User');
+        return $this->belongsTo($userModel);
     }
 }

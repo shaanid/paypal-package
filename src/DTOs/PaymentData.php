@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs\PayPal;
+namespace Shaanid\PayPal\DTOs;
 
 use Illuminate\Support\Collection;
 

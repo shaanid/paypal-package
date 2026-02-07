@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\PayPal;
+namespace Shaanid\PayPal\Services;
 
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 use Illuminate\Support\Facades\Log;
@@ -9,7 +9,7 @@ use Exception;
 
 /**
  * Class PayPalService
- * @package App\Services\PayPal
+ * @package Shaanid\PayPal\Services
  */
 class PayPalService
 {

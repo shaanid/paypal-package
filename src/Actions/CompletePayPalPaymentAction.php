@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Actions\PayPal;
+namespace Shaanid\PayPal\Actions;
 
-use App\Models\Transaction;
-use App\Services\PayPal\PayPalService;
-use App\Events\PayPal\PaymentCompleted;
-use App\Events\PayPal\PaymentFailed;
+use Shaanid\PayPal\Models\Transaction;
+use Shaanid\PayPal\Services\PayPalService;
 use Exception;
 use Illuminate\Support\Collection;
 use Throwable;
@@ -41,18 +39,17 @@ class CompletePayPalPaymentAction
                     'payload' => array_merge($transaction->payload ?? [], ['capture' => $response])
                 ]);
 
-                // event(new PaymentCompleted($transaction));
-
                 return $transaction;
             }
 
             $transaction->update(['status' => 'FAILED']);
-            // event(new PaymentFailed($transaction));
 
             throw new Exception('Payment capture failed or was not completed.');
 
         } catch (Throwable $e) {
-            $transaction->update(['status' => 'FAILED']);
+            if (isset($transaction)) {
+                $transaction->update(['status' => 'FAILED']);
+            }
             throw $e;
         }
     }

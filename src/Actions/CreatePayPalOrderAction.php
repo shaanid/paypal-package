@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Actions\PayPal;
+namespace Shaanid\PayPal\Actions;
 
 use Exception;
 use Illuminate\Support\Collection;
-use App\Models\Transaction;
-use App\Services\PayPal\PayPalService;
+use Shaanid\PayPal\Models\Transaction;
+use Shaanid\PayPal\Services\PayPalService;
 use Illuminate\Support\Str;
 use Throwable;
 
 class CreatePayPalOrderAction
 {
-    public function __construct(private readonly PayPalService $payPalService) {}
+    public function __construct(private readonly PayPalService $payPalService)
+    {
+    }
 
     /**
      * @param Collection $collection

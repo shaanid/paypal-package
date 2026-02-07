@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\PayPal;
+namespace Shaanid\PayPal\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\PayPal\ProcessPaymentRequest;
-use App\Actions\PayPal\CreatePayPalOrderAction;
-use App\Actions\PayPal\CompletePayPalPaymentAction;
-use App\Actions\PayPal\CancelPayPalPaymentAction;
-use App\DTOs\PayPal\PaymentData;
+use Illuminate\Routing\Controller;
+use Shaanid\PayPal\Http\Requests\ProcessPaymentRequest;
+use Shaanid\PayPal\Actions\CreatePayPalOrderAction;
+use Shaanid\PayPal\Actions\CompletePayPalPaymentAction;
+use Shaanid\PayPal\Actions\CancelPayPalPaymentAction;
+use Shaanid\PayPal\DTOs\PaymentData;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -20,7 +20,7 @@ class PayPalController extends Controller
      */
     public function index(): View
     {
-        return view('PayPal.index');
+        return view('paypal::index');
     }
 
     /**

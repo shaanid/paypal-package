@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\PayPal;
+namespace Shaanid\PayPal\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 

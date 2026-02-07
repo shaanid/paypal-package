@@ -1,10 +1,21 @@
 <?php
 
-namespace Tests;
+namespace Shaanid\PayPal\Tests;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Orchestra\Testbench\TestCase as Orchestra;
+use Shaanid\PayPal\PayPalServiceProvider;
 
-abstract class TestCase extends BaseTestCase
+class TestCase extends Orchestra
 {
-    //
+    protected function getPackageProviders($app)
+    {
+        return [
+            PayPalServiceProvider::class,
+        ];
+    }
+
+    protected function getEnvironmentSetUp($app)
+    {
+        config()->set('database.default', 'testing');
+    }
 }
