@@ -3,37 +3,20 @@
 namespace App\Http\Controllers\PayPal;
 
 use App\Http\Controllers\Controller;
-use App\Services\PayPal\PayPalService;
+use App\Http\Requests\PayPal\ProcessPaymentRequest;
+use App\Actions\PayPal\CreatePayPalOrderAction;
+use App\Actions\PayPal\CompletePayPalPaymentAction;
+use App\Actions\PayPal\CancelPayPalPaymentAction;
+use App\DTOs\PayPal\PaymentData;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Throwable;
 
-/**
- * Class PayPalController
- * @package App\Http\Controllers\PayPal
- */
 class PayPalController extends Controller
 {
     /**
-     * @var PayPalService
-     */
-    protected $payPalService;
-
-    /**
-     * PayPalController constructor.
-     *
-     * @param PayPalService $payPalService
-     */
-    public function __construct(PayPalService $payPalService)
-    {
-        $this->payPalService = $payPalService;
-    }
-
-    /**
      * Display the payment initial page.
-     *
-     * @return View
      */
     public function index(): View
     {
@@ -41,71 +24,44 @@ class PayPalController extends Controller
     }
 
     /**
-     * Initiate the PayPal transaction process.
-     *
-     * @param Request $request
-     * @return RedirectResponse
+     * Initiate the PayPal transaction process using the Create Action.
      */
-    public function process(Request $request): RedirectResponse
+    public function process(ProcessPaymentRequest $request, CreatePayPalOrderAction $action): RedirectResponse
     {
         try {
-            // Amount could be passed from request in a real scenario
-            $amount = '10.00';
-            $response = $this->payPalService->createOrder($amount);
+            $paymentData = PaymentData::fromArray($request->validated(), auth()->id());
 
-            $approvalLink = $this->payPalService->getApprovalLink($response);
+            $approvalLink = $action->execute($paymentData->toCollection());
 
-            if ($approvalLink) {
-                return redirect()->away($approvalLink);
-            }
-
-            return redirect()
-                ->route('paypal.index')
-                ->with('error', 'Could not initiate PayPal payment links.');
+            return redirect()->away($approvalLink);
 
         } catch (Throwable $th) {
-            report($th);
-            return redirect()
-                ->route('paypal.index')
-                ->with('error', $th->getMessage() ?: 'An error occurred during the payment initialization.');
+            return redirect()->route('paypal.index')->with('error', $th->getMessage() ?: 'An error occurred during payment initialization.');
         }
     }
 
     /**
-     * Handle the successful PayPal transaction callback.
-     *
-     * @param Request $request
-     * @return RedirectResponse
+     * Handle the successful PayPal callback using the Complete Action.
      */
-    public function success(Request $request): RedirectResponse
+    public function success(Request $request, CompletePayPalPaymentAction $action): RedirectResponse
     {
         try {
-            $token = $request->get('token');
-            if (!$token) {
-                return redirect()->route('paypal.index')->with('error', 'Invalid transaction token.');
-            }
+            $action->execute(collect($request->all()));
 
-            $response = $this->payPalService->captureOrder($token);
-
-            if (isset($response['status']) && $response['status'] === 'COMPLETED') {
-                return redirect()->route('paypal.index')->with('success', 'Transaction completed successfully.');
-            }
-
-            return redirect()->route('paypal.index')->with('error', 'Payment confirmation failed.');
+            return redirect()->route('paypal.index')->with('success', 'Transaction completed successfully.');
 
         } catch (Throwable $th) {
-            report($th);
             return redirect()->route('paypal.index')->with('error', $th->getMessage() ?: 'An error occurred during payment confirmation.');
         }
     }
 
     /**
-     * Handle the canceled PayPal transaction callback.
-     *
-     * @return RedirectResponse
+     * Handle the canceled PayPal callback using the Cancel Action.
      */
-    public function cancel(): RedirectResponse
+    public function cancel(Request $request, CancelPayPalPaymentAction $action): RedirectResponse
     {
+        $action->execute(collect($request->all()));
+
         return redirect()->route('paypal.index')->with('error', 'Payment was canceled by the user.');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services\PayPal;
 
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 use Exception;
 
@@ -60,14 +61,18 @@ class PayPalService
         ];
 
         try {
+            Log::info("PayPal: Creating order for amount {$amount} {$currency}");
             $response = $this->provider->createOrder($data);
 
             if (isset($response['error'])) {
+                Log::error("PayPal: Order creation error - " . json_encode($response['error']));
                 throw new Exception($response['error']['message'] ?? 'Failed to create PayPal order.');
             }
 
+            Log::debug("PayPal: Order created successfully with ID: " . ($response['id'] ?? 'N/A'));
             return $response;
         } catch (Throwable $e) {
+            Log::critical("PayPal: Order Creation Exception - " . $e->getMessage());
             throw new Exception("PayPal Order Creation Error: " . $e->getMessage());
         }
     }
@@ -82,14 +87,18 @@ class PayPalService
     public function captureOrder(string $token): array
     {
         try {
+            Log::info("PayPal: Capturing order with token {$token}");
             $response = $this->provider->capturePaymentOrder($token);
 
             if (isset($response['error'])) {
+                Log::error("PayPal: Order capture error - " . json_encode($response['error']));
                 throw new Exception($response['error']['message'] ?? 'Failed to capture PayPal order.');
             }
 
+            Log::info("PayPal: Order captured successfully with status: " . ($response['status'] ?? 'UNKNOWN'));
             return $response;
         } catch (Throwable $e) {
+            Log::critical("PayPal: Order Capture Exception - " . $e->getMessage());
             throw new Exception("PayPal Order Capture Error: " . $e->getMessage());
         }
     }
